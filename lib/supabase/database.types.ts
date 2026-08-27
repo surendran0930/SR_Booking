@@ -2,6 +2,14 @@
 // real thing with:
 //   npx supabase gen types typescript --project-id <your-project-ref> > lib/supabase/database.types.ts
 // This hand-written version keeps the app compiling until you do that.
+//
+// NOTE: each table's Row is a standalone named type (not looked up via
+// Database["public"]["Tables"][...]["Row"]). Self-referencing the Database
+// type from inside its own definition can make TypeScript give up and
+// collapse unrelated tables' types to `never` once there are enough tables/
+// self-references — this only shows up under `next build`'s full type-check,
+// not under `next dev`. Keeping every Row/Insert/Update built from a plain
+// named type avoids that circularity entirely.
 
 export type Json =
   | string
@@ -11,213 +19,231 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+type ProfileRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: "ADMIN" | "CUSTOMER";
+  customer_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type CustomerRow = {
+  id: string;
+  customer_type: "INDIVIDUAL" | "BUSINESS";
+  name: string;
+  company_name: string | null;
+  phone: string;
+  alternative_phone: string | null;
+  email: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  gstin: string | null;
+  notes: string | null;
+  device_type: "PRINTER" | "LAPTOP" | "COMPUTER" | "SCANNER" | null;
+  device_model: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type ProductRow = {
+  id: string;
+  name: string;
+  sku: string | null;
+  brand: string | null;
+  category: string | null;
+  description: string | null;
+  selling_price: number;
+  gst_percentage: number;
+  unit: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type ServiceRow = {
+  id: string;
+  name: string;
+  service_code: string | null;
+  description: string | null;
+  service_charge: number;
+  gst_percentage: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+type InvoiceRow = {
+  id: string;
+  invoice_number: string;
+  invoice_type: "SALES" | "SERVICE";
+  customer_id: string;
+  invoice_date: string;
+  due_date: string | null;
+  gst_mode: "CGST_SGST" | "IGST" | "NONE";
+  subtotal: number;
+  discount: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  gst_total: number;
+  grand_total: number;
+  amount_paid: number;
+  balance_due: number;
+  payment_status: "PAID" | "PARTIAL" | "PENDING";
+  notes: string | null;
+  printer_brand: string | null;
+  printer_model: string | null;
+  printer_serial: string | null;
+  customer_complaint: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type InvoiceItemRow = {
+  id: string;
+  invoice_id: string;
+  item_type: "PRODUCT" | "SERVICE";
+  product_id: string | null;
+  service_id: string | null;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  gst_percentage: number;
+  gst_amount: number;
+  total_amount: number;
+  sort_order: number;
+};
+
+type PaymentRow = {
+  id: string;
+  invoice_id: string;
+  amount: number;
+  payment_method: "CASH" | "UPI" | "BANK_TRANSFER" | "CARD" | "OTHER";
+  payment_date: string;
+  reference_number: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+type BusinessSettingsRow = {
+  id: string;
+  business_name: string;
+  tagline: string;
+  business_address: string | null;
+  phone: string | null;
+  email: string | null;
+  gstin: string | null;
+  state: string | null;
+  pincode: string | null;
+  invoice_prefix: string;
+  invoice_starting_number: number;
+  next_invoice_number: number;
+  logo_url: string | null;
+  terms_and_conditions: string | null;
+  bank_details: string | null;
+  upi_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type ServiceTicketRow = {
+  id: string;
+  ticket_seq: number;
+  ticket_number: string;
+  customer_id: string | null;
+  customer_name: string;
+  phone_number: string;
+  printer_brand: string;
+  printer_model: string;
+  serial_number: string | null;
+  problem_description: string | null;
+  status: "RECEIVED" | "IN_PROGRESS" | "READY" | "COLLECTED";
+  received_at: string;
+  ready_at: string | null;
+  collected_at: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
       profiles: {
-        Row: {
-          id: string;
-          name: string;
-          email: string;
-          phone: string | null;
-          role: "ADMIN" | "CUSTOMER";
-          customer_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
+        Row: ProfileRow;
+        Insert: Partial<ProfileRow> & {
           id: string;
           name: string;
           email: string;
         };
-        Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
+        Update: Partial<ProfileRow>;
       };
       customers: {
-        Row: {
-          id: string;
-          customer_type: "INDIVIDUAL" | "BUSINESS";
-          name: string;
-          company_name: string | null;
-          phone: string;
-          alternative_phone: string | null;
-          email: string | null;
-          address: string | null;
-          city: string | null;
-          state: string | null;
-          pincode: string | null;
-          gstin: string | null;
-          notes: string | null;
-          device_type: "PRINTER" | "LAPTOP" | "COMPUTER" | "SCANNER" | null;
-          device_model: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["customers"]["Row"]> & {
+        Row: CustomerRow;
+        Insert: Partial<CustomerRow> & {
           name: string;
           phone: string;
         };
-        Update: Partial<Database["public"]["Tables"]["customers"]["Row"]>;
+        Update: Partial<CustomerRow>;
       };
       products: {
-        Row: {
-          id: string;
-          name: string;
-          sku: string | null;
-          brand: string | null;
-          category: string | null;
-          description: string | null;
-          selling_price: number;
-          gst_percentage: number;
-          unit: string;
-          is_active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["products"]["Row"]> & {
+        Row: ProductRow;
+        Insert: Partial<ProductRow> & {
           name: string;
           selling_price: number;
         };
-        Update: Partial<Database["public"]["Tables"]["products"]["Row"]>;
+        Update: Partial<ProductRow>;
       };
       services: {
-        Row: {
-          id: string;
-          name: string;
-          service_code: string | null;
-          description: string | null;
-          service_charge: number;
-          gst_percentage: number;
-          is_active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["services"]["Row"]> & {
+        Row: ServiceRow;
+        Insert: Partial<ServiceRow> & {
           name: string;
           service_charge: number;
         };
-        Update: Partial<Database["public"]["Tables"]["services"]["Row"]>;
+        Update: Partial<ServiceRow>;
       };
       invoices: {
-        Row: {
-          id: string;
-          invoice_number: string;
-          invoice_type: "SALES" | "SERVICE";
-          customer_id: string;
-          invoice_date: string;
-          due_date: string | null;
-          gst_mode: "CGST_SGST" | "IGST" | "NONE";
-          subtotal: number;
-          discount: number;
-          cgst: number;
-          sgst: number;
-          igst: number;
-          gst_total: number;
-          grand_total: number;
-          amount_paid: number;
-          balance_due: number;
-          payment_status: "PAID" | "PARTIAL" | "PENDING";
-          notes: string | null;
-          printer_brand: string | null;
-          printer_model: string | null;
-          printer_serial: string | null;
-          customer_complaint: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["invoices"]["Row"]>;
-        Update: Partial<Database["public"]["Tables"]["invoices"]["Row"]>;
+        Row: InvoiceRow;
+        Insert: Partial<InvoiceRow>;
+        Update: Partial<InvoiceRow>;
       };
       invoice_items: {
-        Row: {
-          id: string;
-          invoice_id: string;
-          item_type: "PRODUCT" | "SERVICE";
-          product_id: string | null;
-          service_id: string | null;
-          description: string;
-          quantity: number;
-          unit_price: number;
-          gst_percentage: number;
-          gst_amount: number;
-          total_amount: number;
-          sort_order: number;
-        };
-        Insert: Partial<Database["public"]["Tables"]["invoice_items"]["Row"]>;
-        Update: Partial<Database["public"]["Tables"]["invoice_items"]["Row"]>;
+        Row: InvoiceItemRow;
+        Insert: Partial<InvoiceItemRow>;
+        Update: Partial<InvoiceItemRow>;
       };
       payments: {
-        Row: {
-          id: string;
-          invoice_id: string;
-          amount: number;
-          payment_method: "CASH" | "UPI" | "BANK_TRANSFER" | "CARD" | "OTHER";
-          payment_date: string;
-          reference_number: string | null;
-          notes: string | null;
-          created_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["payments"]["Row"]>;
-        Update: Partial<Database["public"]["Tables"]["payments"]["Row"]>;
+        Row: PaymentRow;
+        Insert: Partial<PaymentRow>;
+        Update: Partial<PaymentRow>;
       };
       business_settings: {
-        Row: {
-          id: string;
-          business_name: string;
-          tagline: string;
-          business_address: string | null;
-          phone: string | null;
-          email: string | null;
-          gstin: string | null;
-          state: string | null;
-          pincode: string | null;
-          invoice_prefix: string;
-          invoice_starting_number: number;
-          next_invoice_number: number;
-          logo_url: string | null;
-          terms_and_conditions: string | null;
-          bank_details: string | null;
-          upi_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["business_settings"]["Row"]>;
-        Update: Partial<Database["public"]["Tables"]["business_settings"]["Row"]>;
+        Row: BusinessSettingsRow;
+        Insert: Partial<BusinessSettingsRow>;
+        Update: Partial<BusinessSettingsRow>;
       };
       service_tickets: {
-        Row: {
-          id: string;
-          ticket_seq: number;
-          ticket_number: string;
-          customer_id: string | null;
-          customer_name: string;
-          phone_number: string;
-          printer_brand: string;
-          printer_model: string;
-          serial_number: string | null;
-          problem_description: string | null;
-          status: "RECEIVED" | "IN_PROGRESS" | "READY" | "COLLECTED";
-          received_at: string;
-          ready_at: string | null;
-          collected_at: string | null;
-          notes: string | null;
-          created_by: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<Database["public"]["Tables"]["service_tickets"]["Row"]> & {
+        Row: ServiceTicketRow;
+        Insert: Partial<ServiceTicketRow> & {
           customer_name: string;
           phone_number: string;
           printer_brand: string;
           printer_model: string;
         };
-        Update: Partial<Database["public"]["Tables"]["service_tickets"]["Row"]>;
+        Update: Partial<ServiceTicketRow>;
       };
     };
     Views: Record<string, never>;
     Functions: {
       create_invoice: {
         Args: { payload: Json };
-        Returns: Database["public"]["Tables"]["invoices"]["Row"];
+        Returns: InvoiceRow;
       };
       customer_outstanding_totals: {
         Args: { customer_ids: string[] };
