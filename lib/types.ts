@@ -13,6 +13,14 @@ export const CustomerType = {
 } as const;
 export type CustomerType = (typeof CustomerType)[keyof typeof CustomerType];
 
+export const DeviceType = {
+  PRINTER: "PRINTER",
+  LAPTOP: "LAPTOP",
+  COMPUTER: "COMPUTER",
+  SCANNER: "SCANNER",
+} as const;
+export type DeviceType = (typeof DeviceType)[keyof typeof DeviceType];
+
 export const InvoiceType = {
   SALES: "SALES",
   SERVICE: "SERVICE",

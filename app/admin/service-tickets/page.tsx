@@ -21,13 +21,18 @@ import {
 import { requireAdmin } from "@/lib/auth/guards";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
+import { ServiceTicketStatus, type ServiceTicketStatus as ServiceTicketStatusType } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 
 type PageProps = {
   searchParams: Promise<{ search?: string; status?: string; page?: string }>;
 };
 
-const STATUS_VALUES = ["RECEIVED", "IN_PROGRESS", "READY", "COLLECTED"];
+const STATUS_VALUES = Object.values(ServiceTicketStatus);
+
+function isServiceTicketStatus(value: string): value is ServiceTicketStatusType {
+  return (STATUS_VALUES as readonly string[]).includes(value);
+}
 
 function escapeFilterTerm(value: string) {
   return value.replace(/[%,()]/g, (char) => `\\${char}`);
@@ -59,7 +64,7 @@ export default async function ServiceTicketsPage({ searchParams }: PageProps) {
     );
   }
 
-  if (STATUS_VALUES.includes(status)) {
+  if (isServiceTicketStatus(status)) {
     request = request.eq("status", status);
   }
 

@@ -34,6 +34,8 @@ export const customerSchema = z.object({
       "GSTIN is invalid",
     ),
   notes: z.string().optional().nullable(),
+  deviceType: z.enum(["PRINTER", "LAPTOP", "COMPUTER", "SCANNER"]).optional().nullable(),
+  deviceModel: z.string().optional().nullable(),
   createLogin: z.boolean().optional(),
   loginPassword: z.string().optional().nullable(),
 });

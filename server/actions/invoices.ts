@@ -101,9 +101,9 @@ export async function createInvoiceAction(raw: unknown): Promise<ActionResult> {
     }),
   };
 
-  const { data: invoice, error } = await supabase
-    .rpc("create_invoice", { payload })
-    .single();
+  const { data: invoice, error } = await supabase.rpc("create_invoice", {
+    payload,
+  });
 
   if (error || !invoice) {
     console.error(error);
