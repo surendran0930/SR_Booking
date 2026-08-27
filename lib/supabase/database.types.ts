@@ -3,13 +3,23 @@
 //   npx supabase gen types typescript --project-id <your-project-ref> > lib/supabase/database.types.ts
 // This hand-written version keeps the app compiling until you do that.
 //
-// NOTE: each table's Row is a standalone named type (not looked up via
-// Database["public"]["Tables"][...]["Row"]). Self-referencing the Database
-// type from inside its own definition can make TypeScript give up and
-// collapse unrelated tables' types to `never` once there are enough tables/
-// self-references — this only shows up under `next build`'s full type-check,
-// not under `next dev`. Keeping every Row/Insert/Update built from a plain
-// named type avoids that circularity entirely.
+// NOTE 1: each table's Row is a standalone named type (not looked up via
+// Database["public"]["Tables"][...]["Row"]) to avoid self-referencing the
+// Database type from inside its own definition.
+//
+// NOTE 2 (the actual fix for the `never` build errors): every table entry
+// MUST include a `Relationships: []` field. @supabase/supabase-js's
+// SupabaseClient<Database, SchemaName> computes its internal `Schema` type
+// parameter as `Database["public"] extends GenericSchema ? Database["public"] : never`
+// — and GenericSchema requires every table to have `Row`, `Insert`, `Update`,
+// AND `Relationships: GenericRelationship[]`. Without `Relationships`, the
+// whole schema fails that check and `Schema` silently becomes `never`, which
+// makes every `.insert()`/`.update()` call's expected argument type `never`
+// too — exactly the "Argument of type '{...}' is not assignable to parameter
+// of type 'never'" errors `next build`'s full type-check reports (this
+// doesn't show up under `next dev`, which skips the full check). We don't
+// track real foreign-key relationship metadata here, so every table just
+// gets an empty `Relationships: []` — that's enough to satisfy the type.
 
 export type Json =
   | string
@@ -183,6 +193,7 @@ export type Database = {
           email: string;
         };
         Update: Partial<ProfileRow>;
+        Relationships: [];
       };
       customers: {
         Row: CustomerRow;
@@ -191,6 +202,7 @@ export type Database = {
           phone: string;
         };
         Update: Partial<CustomerRow>;
+        Relationships: [];
       };
       products: {
         Row: ProductRow;
@@ -199,6 +211,7 @@ export type Database = {
           selling_price: number;
         };
         Update: Partial<ProductRow>;
+        Relationships: [];
       };
       services: {
         Row: ServiceRow;
@@ -207,26 +220,31 @@ export type Database = {
           service_charge: number;
         };
         Update: Partial<ServiceRow>;
+        Relationships: [];
       };
       invoices: {
         Row: InvoiceRow;
         Insert: Partial<InvoiceRow>;
         Update: Partial<InvoiceRow>;
+        Relationships: [];
       };
       invoice_items: {
         Row: InvoiceItemRow;
         Insert: Partial<InvoiceItemRow>;
         Update: Partial<InvoiceItemRow>;
+        Relationships: [];
       };
       payments: {
         Row: PaymentRow;
         Insert: Partial<PaymentRow>;
         Update: Partial<PaymentRow>;
+        Relationships: [];
       };
       business_settings: {
         Row: BusinessSettingsRow;
         Insert: Partial<BusinessSettingsRow>;
         Update: Partial<BusinessSettingsRow>;
+        Relationships: [];
       };
       service_tickets: {
         Row: ServiceTicketRow;
@@ -237,6 +255,7 @@ export type Database = {
           printer_model: string;
         };
         Update: Partial<ServiceTicketRow>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
