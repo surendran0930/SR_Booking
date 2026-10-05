@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { PrintTrigger } from "@/components/shared/print-trigger";
 import { Button } from "@/components/ui/button";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { DEFAULT_LOGO_PATH } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessSettings } from "@/server/actions/settings";
@@ -21,7 +21,7 @@ export default async function ServiceTicketAcknowledgmentPage({
   params,
   searchParams,
 }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { id } = await params;
   const { print } = await searchParams;
   const supabase = await createClient();

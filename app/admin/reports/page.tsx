@@ -1,9 +1,9 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 
 export default async function AdminReportsPage() {
-  await requireAdmin();
+  await requireStaff();
 
   return (
     <div className="space-y-6">

@@ -25,14 +25,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMonthBounds } from "@/lib/dates";
 import { shortId } from "@/lib/ids";
 import { formatCurrency, formatDate, greetingForNow } from "@/lib/utils";
 
 export default async function AdminDashboardPage() {
-  const session = await requireAdmin();
+  const session = await requireStaff();
   const { start, end } = getCurrentMonthBounds();
   const supabase = await createClient();
 

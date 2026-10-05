@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { moneyNumber } from "@/lib/money";
 import type { InvoiceType } from "@/lib/types";
@@ -21,7 +21,7 @@ function resolveInvoiceType(value?: string): InvoiceType {
 }
 
 export default async function NewInvoicePage({ searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const params = await searchParams;
   const invoiceType = resolveInvoiceType(params.type);
   const supabase = await createClient();

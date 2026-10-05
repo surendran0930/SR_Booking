@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { ServiceTicketStatus, type ServiceTicketStatus as ServiceTicketStatusType } from "@/lib/types";
@@ -44,7 +44,7 @@ function parsePage(value?: string) {
 }
 
 export default async function ServiceTicketsPage({ searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const params = await searchParams;
   const search = params.search ?? "";
   const status = params.status ?? "ALL";

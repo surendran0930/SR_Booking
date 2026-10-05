@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin, requireCustomer } from "@/lib/auth/guards";
+import { requireStaff, requireCustomer } from "@/lib/auth/guards";
 import { invoiceSchema } from "@/lib/validations";
 import { calculateInvoiceTotals } from "@/lib/invoice/calculations";
 import { moneyNumber } from "@/lib/money";
@@ -14,7 +14,7 @@ export type ActionResult = {
 };
 
 export async function createInvoiceAction(raw: unknown): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = invoiceSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };

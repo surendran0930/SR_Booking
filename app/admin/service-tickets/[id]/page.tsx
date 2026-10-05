@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { RealtimeRefresher } from "@/components/shared/realtime-refresher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 
@@ -19,7 +19,7 @@ type PageProps = {
 };
 
 export default async function ServiceTicketDetailPage({ params, searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { id } = await params;
   const { edit } = await searchParams;
   const isEdit = edit === "true";

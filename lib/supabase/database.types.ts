@@ -34,7 +34,7 @@ type ProfileRow = {
   name: string;
   email: string;
   phone: string | null;
-  role: "ADMIN" | "CUSTOMER";
+  role: "ADMIN" | "MERCHANT" | "CUSTOMER";
   customer_id: string | null;
   created_at: string;
   updated_at: string;
@@ -56,6 +56,11 @@ type CustomerRow = {
   notes: string | null;
   device_type: "PRINTER" | "LAPTOP" | "COMPUTER" | "SCANNER" | null;
   device_model: string | null;
+  // Which staff member (admin or merchant) this customer belongs to. NULL
+  // means it belongs to management (the original admin), not any specific
+  // merchant. Admins see every row regardless; a merchant only sees rows
+  // where this matches their own id (enforced by RLS, not by this type).
+  merchant_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -71,6 +76,7 @@ type ProductRow = {
   gst_percentage: number;
   unit: string;
   is_active: boolean;
+  merchant_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -83,6 +89,7 @@ type ServiceRow = {
   service_charge: number;
   gst_percentage: number;
   is_active: boolean;
+  merchant_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -110,6 +117,7 @@ type InvoiceRow = {
   printer_model: string | null;
   printer_serial: string | null;
   customer_complaint: string | null;
+  merchant_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -178,6 +186,7 @@ type ServiceTicketRow = {
   collected_at: string | null;
   notes: string | null;
   created_by: string | null;
+  merchant_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -193,15 +202,7 @@ export type Database = {
           email: string;
         };
         Update: Partial<ProfileRow>;
-        Relationships: [
-          {
-            foreignKeyName: "profiles_customer_id_fkey";
-            columns: ["customer_id"];
-            isOneToOne: true;
-            referencedRelation: "customers";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       customers: {
         Row: CustomerRow;
@@ -234,57 +235,19 @@ export type Database = {
         Row: InvoiceRow;
         Insert: Partial<InvoiceRow>;
         Update: Partial<InvoiceRow>;
-        Relationships: [
-          {
-            foreignKeyName: "invoices_customer_id_fkey";
-            columns: ["customer_id"];
-            isOneToOne: false;
-            referencedRelation: "customers";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       invoice_items: {
         Row: InvoiceItemRow;
         Insert: Partial<InvoiceItemRow>;
         Update: Partial<InvoiceItemRow>;
-        Relationships: [
-          {
-            foreignKeyName: "invoice_items_invoice_id_fkey";
-            columns: ["invoice_id"];
-            isOneToOne: false;
-            referencedRelation: "invoices";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "invoice_items_product_id_fkey";
-            columns: ["product_id"];
-            isOneToOne: false;
-            referencedRelation: "products";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "invoice_items_service_id_fkey";
-            columns: ["service_id"];
-            isOneToOne: false;
-            referencedRelation: "services";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       payments: {
         Row: PaymentRow;
         Insert: Partial<PaymentRow>;
         Update: Partial<PaymentRow>;
-        Relationships: [
-          {
-            foreignKeyName: "payments_invoice_id_fkey";
-            columns: ["invoice_id"];
-            isOneToOne: false;
-            referencedRelation: "invoices";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       business_settings: {
         Row: BusinessSettingsRow;
@@ -301,22 +264,7 @@ export type Database = {
           printer_model: string;
         };
         Update: Partial<ServiceTicketRow>;
-        Relationships: [
-          {
-            foreignKeyName: "service_tickets_customer_id_fkey";
-            columns: ["customer_id"];
-            isOneToOne: false;
-            referencedRelation: "customers";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "service_tickets_created_by_fkey";
-            columns: ["created_by"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
@@ -329,15 +277,11 @@ export type Database = {
         Args: { customer_ids: string[] };
         Returns: { customer_id: string; total_balance_due: number }[];
       };
-      email_for_identifier: {
-        Args: { identifier: string };
-        Returns: string | null;
-      };
-      current_role: { Args: Record<string, never>; Returns: "ADMIN" | "CUSTOMER" };
+      current_role: { Args: Record<string, never>; Returns: "ADMIN" | "MERCHANT" | "CUSTOMER" };
       is_admin: { Args: Record<string, never>; Returns: boolean };
     };
     Enums: {
-      user_role: "ADMIN" | "CUSTOMER";
+      user_role: "ADMIN" | "MERCHANT" | "CUSTOMER";
       customer_type: "INDIVIDUAL" | "BUSINESS";
       device_type: "PRINTER" | "LAPTOP" | "COMPUTER" | "SCANNER";
       invoice_type: "SALES" | "SERVICE";

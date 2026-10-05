@@ -4,10 +4,10 @@ import { ServiceForm } from "@/components/services/service-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 
 export default async function NewServicePage() {
-  await requireAdmin();
+  await requireStaff();
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">

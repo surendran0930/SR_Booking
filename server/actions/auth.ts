@@ -54,7 +54,11 @@ export async function loginAction(
     .eq("id", data.user.id)
     .single();
 
-  redirect(profile?.role === "ADMIN" ? "/admin/dashboard" : "/customer/dashboard");
+  redirect(
+    profile?.role === "ADMIN" || profile?.role === "MERCHANT"
+      ? "/admin/dashboard"
+      : "/customer/dashboard",
+  );
 }
 
 export async function logoutAction() {

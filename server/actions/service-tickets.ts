@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { serviceTicketSchema } from "@/lib/validations";
 import type { ServiceTicketStatus } from "@/lib/types";
 
@@ -65,7 +65,7 @@ async function findOrCreateCustomerId(
 }
 
 export async function createServiceTicketAction(raw: unknown): Promise<ActionResult> {
-  const session = await requireAdmin();
+  const session = await requireStaff();
   const parsed = serviceTicketSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -109,7 +109,7 @@ export async function updateServiceTicketAction(
   id: string,
   raw: unknown,
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = serviceTicketSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -165,7 +165,7 @@ export async function updateServiceTicketStatusAction(
   id: string,
   status: ServiceTicketStatus,
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const supabase = await createClient();
 
   const { error } = await supabase

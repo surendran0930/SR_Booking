@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ function escapeFilterTerm(value: string) {
 }
 
 export default async function AdminProductsPage({ searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { q, page: pageParam } = await searchParams;
   const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const query = q?.trim() ?? "";

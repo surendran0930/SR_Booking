@@ -5,7 +5,7 @@ import { InvoiceDocument } from "@/components/invoices/invoice-document";
 import { InvoicePrintTrigger } from "@/components/invoices/invoice-print-trigger";
 import { PageHeader } from "@/components/shared/page-header";
 import { PaymentStatusBadge } from "@/components/shared/payment-status-badge";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { DEFAULT_LOGO_PATH } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { getBusinessSettings } from "@/server/actions/settings";
@@ -17,7 +17,7 @@ type PageProps = {
 };
 
 export default async function InvoiceDetailPage({ params, searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { id } = await params;
   const { print } = await searchParams;
   const supabase = await createClient();

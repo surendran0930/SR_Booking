@@ -5,7 +5,7 @@ import { ProductForm } from "@/components/products/product-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 
 type PageProps = {
@@ -13,7 +13,7 @@ type PageProps = {
 };
 
 export default async function EditProductPage({ params }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { id } = await params;
   const supabase = await createClient();
 

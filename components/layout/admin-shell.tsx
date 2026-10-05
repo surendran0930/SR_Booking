@@ -5,13 +5,15 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminTopbar } from "@/components/layout/admin-topbar";
 import { AppShell } from "@/components/layout/app-shell";
 import { logoutAction } from "@/server/actions/auth";
+import type { Role } from "@/lib/types";
 
 type Props = {
   userName: string;
+  role: Role;
   children: React.ReactNode;
 };
 
-export function AdminShell({ userName, children }: Props) {
+export function AdminShell({ userName, role, children }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,6 +25,7 @@ export function AdminShell({ userName, children }: Props) {
           open={open}
           onOpenChange={setOpen}
           logoutAction={logoutAction}
+          role={role}
         />
       }
       topbar={

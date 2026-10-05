@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { customerSchema } from "@/lib/validations";
 
 export type ActionResult = {
@@ -18,7 +18,7 @@ function emptyToNull(value: string | null | undefined) {
 }
 
 export async function createCustomerAction(raw: unknown): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = customerSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -89,7 +89,7 @@ export async function updateCustomerAction(
   id: string,
   raw: unknown,
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = customerSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -128,7 +128,7 @@ export async function updateCustomerAction(
 }
 
 export async function deleteCustomerAction(id: string): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const supabase = await createClient();
 
   const { count: invoiceCount } = await supabase

@@ -5,7 +5,9 @@ import { createServerClient } from "@supabase/ssr";
 // Next.js 16 route protection (replaces middleware.ts).
 // Refreshes the Supabase session on every request (required so server
 // components downstream get a valid, non-expired auth cookie) and enforces
-// the ADMIN/CUSTOMER route boundary.
+// the staff (ADMIN/MERCHANT)/CUSTOMER route boundary. ADMIN and MERCHANT
+// share the same /admin/* area — MERCHANT just sees a subset of the data,
+// scoped by RLS, and a couple of nav items are hidden for them client-side.
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -34,7 +36,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let role: "ADMIN" | "CUSTOMER" | null = null;
+  let role: "ADMIN" | "MERCHANT" | "CUSTOMER" | null = null;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -43,6 +45,8 @@ export async function proxy(request: NextRequest) {
       .single();
     role = profile?.role ?? null;
   }
+
+  const isStaff = role === "ADMIN" || role === "MERCHANT";
 
   const { pathname } = request.nextUrl;
   const isAuthPage = pathname === "/login";
@@ -54,14 +58,14 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     return NextResponse.redirect(
-      new URL(role === "ADMIN" ? "/admin/dashboard" : "/customer/dashboard", request.url),
+      new URL(isStaff ? "/admin/dashboard" : "/customer/dashboard", request.url),
     );
   }
 
   if (isAuthPage) {
     if (user) {
       return NextResponse.redirect(
-        new URL(role === "ADMIN" ? "/admin/dashboard" : "/customer/dashboard", request.url),
+        new URL(isStaff ? "/admin/dashboard" : "/customer/dashboard", request.url),
       );
     }
     return response;
@@ -71,7 +75,7 @@ export async function proxy(request: NextRequest) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    if (role !== "ADMIN") {
+    if (!isStaff) {
       return NextResponse.redirect(new URL("/customer/dashboard", request.url));
     }
     return response;

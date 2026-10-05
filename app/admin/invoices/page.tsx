@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { INVOICES_PAGE_SIZE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -56,7 +56,7 @@ function escapeFilterTerm(value: string) {
 }
 
 export default async function InvoicesPage({ searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const params = await searchParams;
 
   const search = params.search ?? "";

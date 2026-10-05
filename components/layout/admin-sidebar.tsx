@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Package,
   Settings,
+  Store,
   Users,
   Wrench,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { BrandLogo } from "@/components/shared/brand-logo";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import type { Role } from "@/lib/types";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,13 +28,17 @@ const NAV_ITEMS = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/services", label: "Services", icon: Wrench },
   { href: "/admin/reports", label: "Reports", icon: BarChart3 },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  // Management-only: creating/removing merchant logins and editing shared
+  // business settings aren't something a merchant should touch.
+  { href: "/admin/merchants", label: "Merchants", icon: Store, adminOnly: true },
+  { href: "/admin/settings", label: "Settings", icon: Settings, adminOnly: true },
 ] as const;
 
 type AdminSidebarProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   logoutAction: () => void | Promise<void>;
+  role: Role;
   className?: string;
 };
 
@@ -40,9 +46,11 @@ export function AdminSidebar({
   open,
   onOpenChange,
   logoutAction,
+  role,
   className,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const items = NAV_ITEMS.filter((item) => !("adminOnly" in item && item.adminOnly) || role === "ADMIN");
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -76,7 +84,7 @@ export function AdminSidebar({
         className="flex flex-1 flex-col gap-1 overflow-y-auto p-4"
         aria-label="Admin navigation"
       >
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
             <Link

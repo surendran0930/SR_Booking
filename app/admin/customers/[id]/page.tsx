@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { createClient } from "@/lib/supabase/server";
 import { shortId } from "@/lib/ids";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -31,7 +31,7 @@ type PageProps = {
 };
 
 export default async function CustomerDetailPage({ params, searchParams }: PageProps) {
-  await requireAdmin();
+  await requireStaff();
   const { id } = await params;
   const { edit } = await searchParams;
   const isEdit = edit === "true";

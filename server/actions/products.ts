@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireStaff } from "@/lib/auth/guards";
 import { productSchema } from "@/lib/validations";
 
 export type ActionResult = {
@@ -17,7 +17,7 @@ function emptyToNull(value: string | null | undefined) {
 }
 
 export async function createProductAction(raw: unknown): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = productSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -53,7 +53,7 @@ export async function updateProductAction(
   id: string,
   raw: unknown,
 ): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const parsed = productSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Validation failed" };
@@ -86,7 +86,7 @@ export async function updateProductAction(
 }
 
 export async function deleteProductAction(id: string): Promise<ActionResult> {
-  await requireAdmin();
+  await requireStaff();
   const supabase = await createClient();
 
   const { count: used } = await supabase

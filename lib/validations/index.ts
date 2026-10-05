@@ -132,3 +132,16 @@ export type InvoiceInput = z.infer<typeof invoiceSchema>;
 export type BusinessSettingsInput = z.infer<typeof businessSettingsSchema>;
 export type ServiceTicketInput = z.infer<typeof serviceTicketSchema>;
 export type ServiceTicketStatusInput = z.infer<typeof serviceTicketStatusSchema>;
+
+export const merchantSchema = z.object({
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Enter a valid email"),
+  phone: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || /^[0-9+\-\s()]{10,15}$/.test(v), "Enter a valid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type MerchantInput = z.infer<typeof merchantSchema>;
